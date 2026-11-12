@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevKit</title>
+<link rel="icon" type="image/png" sizes="256x256" href="/icon.png">
+<style>
+:root{--bg:#15121d;--panel:#1b1727;--raise:#242034;--line:#332c47;--text:#ece8f6;--mute:#978eac;--acc:#9d6bff;--acc2:#c3a6ff;--ok:#58d3a2;--bad:#ff7590;--warn:#f2b86b;
+--ui:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;--mono:"Cascadia Mono",Consolas,monospace}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.5 var(--ui);display:grid;grid-template-columns:clamp(180px,16vw,240px) minmax(0,1fr);color-scheme:dark;overflow:hidden}
+aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:20px 12px;gap:4px;min-height:0}
+.brand{font-size:20px;font-weight:700;letter-spacing:.2px;padding:0 10px 18px}.brand i{font-style:normal;color:var(--acc)}
+nav button{all:unset;display:block;width:100%;box-sizing:border-box;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--mute);border-left:3px solid transparent}
+nav button:hover{color:var(--text);background:var(--raise)}
+nav button.on{color:var(--text);background:var(--raise);border-left-color:var(--acc);font-weight:600}
+nav button:focus-visible,.btn:focus-visible,.ib:focus-visible,.lnk:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--acc2);outline-offset:1px}
+.side-end{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding:0 4px}
+.pill{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px;padding:0 8px}
+.dot{display:inline-block;flex:none;width:9px;height:9px;border-radius:50%;background:var(--mute)}
+.dot.up,.dot.running{background:var(--ok);box-shadow:0 0 8px var(--ok)}.dot.down,.dot.off{background:var(--bad)}.dot.creating{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+main{display:flex;flex-direction:column;min-width:0;min-height:0;height:100vh;height:100dvh}
+header{padding:clamp(14px,2vw,24px) clamp(14px,2vw,32px) 4px}h1{margin:0;font-size:22px}header p{margin:2px 0 0;color:var(--mute)}
+.views{flex:1;min-height:0;overflow:auto;padding:clamp(12px,1.6vw,28px) clamp(14px,2vw,32px)}
+.views.fill{overflow:hidden;padding-bottom:0}
+.views>section{width:100%}.views.fill>section{height:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;align-items:start}
+.grid.wide{grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr))}
+.span{grid-column:1/-1}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.grid>.card,.grid>.proj{margin:0}.views>section>.card{margin-bottom:16px}
+.card h3{margin:0 0 12px;font-size:15px}
+label{display:block;color:var(--mute);font-size:13px}label>input,label>select,label>textarea{margin-top:5px}
+input,select,textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px 10px;font:inherit}
+textarea{font-family:var(--mono);font-size:13px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+input[type=checkbox]{width:auto;accent-color:var(--acc);margin:0 8px 0 0}
+label.chk{display:flex;align-items:center;margin-top:12px;color:var(--text)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.row.nt{margin-top:0}.grow{flex:1;min-width:160px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;margin-top:12px}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border-radius:7px;border:1px solid var(--line);background:var(--raise);color:var(--text);font-weight:600;white-space:nowrap;text-align:center}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#14091f}.btn.pri:hover{background:var(--acc2);border-color:var(--acc2)}
+.btn.out{background:transparent;border-color:var(--acc);color:var(--acc2)}.btn.out:hover{background:#2c2147}
+.btn.red{background:var(--bad);border-color:var(--bad);color:#2a0b14}.btn.red:hover{background:#ff94a8;border-color:#ff94a8}
+.btn.dng{color:var(--bad);border-color:#5a2a3a;background:transparent}.btn.dng:hover{border-color:var(--bad)}
+.btn.wide{display:block;width:100%;padding:10px 14px}
+.btn[disabled]{opacity:.45;cursor:progress}
+.btn.out[disabled]{border-color:var(--line);color:var(--mute);background:transparent;opacity:.6;cursor:not-allowed}
+.btn.sm{padding:4px 10px;font-size:13px}
+.lnk{all:unset;cursor:pointer;color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:3px}.lnk:hover{color:var(--acc2)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{display:flex;gap:22px;margin:14px 2px;color:var(--text)}.stat span{display:flex;align-items:center;gap:8px}
+.hint{color:var(--mute);margin:8px 0 0}.hint.warn{color:var(--warn)}
+.alert{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;margin-bottom:16px;border:1px solid #7a2f42;background:#3a1b25;color:#ffc2cf;border-radius:10px;font-weight:600}
+.list>div{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}.list>div:first-child{border-top:0}
+.list .n{flex:1;min-width:0;overflow-wrap:anywhere}.list .m{color:var(--mute);font-size:13px}
+.lk{border-radius:8px}.lk.over-t{box-shadow:0 -2px 0 var(--acc)}.lk.over-b{box-shadow:0 2px 0 var(--acc)}.lk.drag{opacity:.4}
+.grip{all:unset;cursor:grab;color:var(--mute);padding:2px 4px;font-size:16px;line-height:1;letter-spacing:-2px}.grip:hover{color:var(--text)}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:600;background:var(--raise);color:var(--mute)}
+.tag.ok{background:#173a2e;color:var(--ok)}.tag.bad{background:#40202b;color:var(--bad)}.tag.acc{background:#2c2147;color:var(--acc2)}
+pre{margin:10px 0 0;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:10px;max-height:300px;overflow:auto;font:12.5px/1.45 var(--mono);white-space:pre-wrap;word-break:break-all}
+details{margin-top:10px;color:var(--mute)}summary{cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:12px}td,th{text-align:left;padding:6px 8px;border-top:1px solid var(--line)}th{color:var(--mute);font-weight:500}
+/* projekty */
+.proj{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:0}
+.prow{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--raise)}
+.pname{font-size:16px;cursor:pointer}.pst{color:var(--mute);font-size:13px}.sp{flex:1}
+.ctl{display:flex;gap:2px;background:var(--bg);border-radius:9px;padding:3px}
+.ib{all:unset;box-sizing:border-box;cursor:pointer;width:34px;height:30px;display:grid;place-items:center;border-radius:7px;color:var(--mute)}
+.ib:hover{background:var(--raise)}.ib[disabled]{opacity:.28;cursor:default;pointer-events:none}
+.ib.on{background:var(--bg);color:var(--acc2)}.ib.go{color:var(--ok)}.ib.stop{color:var(--bad)}.ib.gear:hover{color:var(--text)}
+.ib svg{width:18px;height:18px}
+.cons{display:grid;grid-template-rows:0fr}.cons.open{grid-template-rows:1fr}.cin{overflow:hidden;min-height:0}
+.term{background:#100d17;margin:0;padding:10px 14px;height:clamp(220px,38vh,520px);overflow:auto;font:12.5px/1.45 var(--mono);white-space:pre-wrap;word-break:break-all;border-top:1px solid var(--line)}
+.term div{min-height:1.45em}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:20px;width:min(660px,92vw);max-height:90vh}
+dialog::backdrop{background:rgba(8,6,12,.72)}dialog h3{margin:0 0 4px}
+.chks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 16px}.chks label.chk{margin-top:8px}
+/* czat Claude */
+.chat{display:flex;flex-direction:column;height:100%;min-height:0}
+.chat-head{display:flex;align-items:center;gap:10px;padding-bottom:10px;flex-wrap:wrap}
+.chat-msgs{flex:1;min-height:0;overflow:auto;padding:4px 4px 16px;scroll-behavior:smooth}
+.chat-col{width:min(100%,1000px);margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.msg{display:flex}.msg.u{justify-content:flex-end}
+.bub{max-width:min(100%,820px);padding:10px 14px;border-radius:14px;overflow-wrap:anywhere}
+.msg.u .bub{background:#2c2147;border:1px solid #43336b;white-space:pre-wrap}
+.msg.a .bub{background:var(--panel);border:1px solid var(--line);width:100%;max-width:none}
+.bub p{margin:0 0 8px}.bub p:last-child{margin:0}.bub p.h{font-weight:700;margin-top:6px}.bub ul,.bub ol{margin:0 0 8px;padding-left:22px}
+.bub code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 5px;font:12.5px var(--mono)}
+.code{margin:8px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#100d17}
+.code-h{display:flex;justify-content:space-between;align-items:center;padding:4px 10px;background:var(--raise);color:var(--mute);font-size:12px}
+.code-h button{all:unset;cursor:pointer;color:var(--acc2)}
+.code pre{margin:0;border:0;border-radius:0;max-height:420px;background:transparent}.code code{background:none;border:0;padding:0}
+.tool{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+.chip{font:12px var(--mono);color:var(--acc2);background:#241c3a;border:1px solid #382c5c;border-radius:6px;padding:2px 8px}
+.toolres{margin:4px 0 0;font-size:12px}.toolres pre{max-height:220px}
+.msg.e .bub{background:#3a1b25;border:1px solid #7a2f42;color:#ffc2cf}
+.typing{color:var(--mute)}.typing i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc);margin-right:4px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+.chat-in{display:flex;gap:8px;align-items:flex-end;padding:10px 0 14px;width:min(100%,1000px);margin:0 auto}
+.chat-in textarea{flex:1;max-height:200px;font-family:var(--ui);font-size:14px;resize:none}
+/* podgląd bazy */
+.prev{display:flex;flex-direction:column;height:100%;min-height:0}
+.prev-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:10px}
+.prev-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(320px,38%,680px);gap:12px;padding-bottom:12px}
+.cv{position:relative;overflow:auto;border:1px solid var(--line);border-radius:12px;background:radial-gradient(circle,#2a2340 1px,transparent 1px) 0 0/22px 22px,var(--bg);min-height:0}
+#pv-sp{position:relative}#pv-in{position:absolute;left:0;top:0;transform-origin:0 0}
+#pv-svg{position:absolute;left:0;top:0;pointer-events:none}
+.ln{fill:none;stroke:var(--acc);stroke-width:1.5;opacity:.5}.ln.on{opacity:1;stroke-width:2.4}
+.tb{position:absolute;width:240px;background:var(--panel);border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line),0 6px 18px rgba(0,0,0,.3);cursor:pointer;user-select:none}
+.tb.sel{box-shadow:0 0 0 2px var(--acc),0 8px 24px rgba(0,0,0,.4)}
+.tb-h{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:var(--raise);cursor:grab;touch-action:none}
+.tb-h:active{cursor:grabbing}.cnt{font-size:11px;color:var(--mute)}
+.tb-r{height:24px;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:12.5px;line-height:24px}
+.tb-r .cn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tb-r .cn.nn{color:var(--mute)}.tb-r .ct{color:var(--mute);font-size:11px;max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k{font-style:normal;width:20px;font-size:10px;font-weight:700;text-align:center;border-radius:4px}.k.pk{color:#14091f;background:var(--acc)}.k.fk{color:#0e1a2e;background:#7aa2ff}
+.dp{display:flex;flex-direction:column;min-height:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+.dp-h{padding:12px 14px 0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;padding:8px 10px 0;border-bottom:1px solid var(--line)}
+.tabs button{all:unset;cursor:pointer;padding:6px 12px;border-radius:7px 7px 0 0;color:var(--mute)}.tabs button.on{color:var(--text);background:var(--raise)}
+.dp-b{flex:1;min-height:0;overflow:auto}
+.dt{margin:0;font-size:12.5px}.dt th{position:sticky;top:0;background:var(--panel);z-index:1;white-space:nowrap}
+.dt td{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono)}
+.dt tr:nth-child(even) td{background:#1f1b2c}.nl{color:var(--mute);font-style:italic}
+.pager{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--line);color:var(--mute);font-size:13px}
+.empty{padding:28px;color:var(--mute);text-align:center}
+/* dziennik */
+#console{border-top:1px solid var(--line);background:#100d17;height:clamp(110px,18vh,220px);display:flex;flex-direction:column}
+#console.min{height:30px}
+#console h4{margin:0;padding:5px clamp(14px,2vw,32px);font-size:12px;color:var(--mute);font-weight:500;display:flex;justify-content:space-between;cursor:pointer;flex:none}
+#console h4 button{all:unset;cursor:pointer;color:var(--acc2)}
+#log{flex:1;overflow:auto;padding:0 clamp(14px,2vw,32px) 8px;font:12.5px/1.5 var(--mono)}
+.ln2{display:flex;gap:12px;border-left:2px solid var(--line);padding-left:10px;margin-bottom:2px}.ln2 time{color:var(--mute);flex:none}.ln2 span{white-space:pre-wrap;word-break:break-word}
+.ln2.ok{border-color:var(--ok)}.ln2.bad{border-color:var(--bad);color:#ffc2cf}.ln2.warn{border-color:var(--warn)}.ln2.cmd{border-color:var(--acc)}
+@media(prefers-reduced-motion:no-preference){.btn,nav button,.ib{transition:background .12s,border-color .12s,color .12s}.cons{transition:grid-template-rows .3s ease}}
+@media(max-width:1000px){.prev-body{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:820px){body{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}aside{flex-direction:row;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid var(--line)}.brand,.side-end{display:none}nav{display:flex}nav button{white-space:nowrap}.g2{grid-template-columns:1fr}main{height:auto;min-height:0}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">Dev<i>Kit</i></div>
+  <nav id="nav">
+    <button data-v="db" class="on">Baza danych</button>
+    <button data-v="req">Klient API</button>
+    <button data-v="proj">Projekt</button>
+    <button data-v="claude">Claude</button>
+    <button data-v="links">Linki</button>
+    <button data-v="set">Ustawienia</button>
+  </nav>
+  <div class="side-end">
+    <div class="pill"><span class="dot" id="dot"></span><span id="dotx">MySQL: sprawdzam</span></div>
+    <button class="btn sm" id="quit">Zamknij DevKit</button>
+  </div>
+</aside>
+
+<main>
+  <header><h1 id="t"></h1><p id="d"></p></header>
+  <div class="views" id="views">
+
+    <section id="v-db">
+      <div class="alert" id="xp-alert" role="alert" hidden><span>XAMPP nie jest zainstalowany</span><button class="lnk" id="xp-inst">Zainstaluj</button></div>
+      <div class="grid">
+        <div class="card">
+          <h3>Serwer XAMPP</h3>
+          <div class="g2">
+            <button class="btn out" id="b-mysql">Uruchom MySQL</button>
+            <button class="btn out" id="b-apache">Uruchom Apache</button>
+          </div>
+          <button class="btn pri wide" id="b-all" style="margin-top:8px">Uruchom wszystko</button>
+          <div class="stat"><span><i class="dot" id="sd-mysql"></i>MySQL</span><span><i class="dot" id="sd-apache"></i>Apache</span></div>
+          <button class="btn pri wide" id="b-pma">Otwórz phpMyAdmin</button>
+        </div>
+        <div class="card">
+          <h3>Baza projektu</h3>
+          <label>Nazwa bazy<input id="dbname" list="dbsug" placeholder="np. kalendarium-szkolne" autocomplete="off" spellcheck="false"></label>
+          <datalist id="dbsug"></datalist>
+          <p class="hint" id="dbstate"></p>
+          <div class="g2" style="margin-top:12px">
+            <button class="btn out" id="b-imp" disabled>Importuj</button>
+            <button class="btn out" id="b-exp" disabled>Eksportuj i usuń z komputera</button>
+          </div>
+          <button class="btn out wide" id="b-prev" style="margin-top:8px" disabled>Podgląd</button>
+          <label class="chk"><input type="checkbox" id="s-drop">Usuń lokalną bazę po eksporcie</label>
+        </div>
+      </div>
+    </section>
+
+    <section id="v-prev" hidden>
+      <div class="prev">
+        <div class="prev-bar">
+          <button class="btn sm" id="pv-back">Wróć</button><b id="pv-title"></b><span class="hint" id="pv-meta" style="margin:0"></span><span class="sp"></span>
+          <button class="btn sm" id="pv-zo" title="Pomniejsz">−</button><span class="hint" id="pv-z" style="margin:0;min-width:42px;text-align:center"></span><button class="btn sm" id="pv-zi" title="Powiększ">+</button>
+          <button class="btn sm" id="pv-fit">Dopasuj</button><button class="btn sm" id="pv-re">Ułóż ponownie</button>
+        </div>
+        <div class="prev-body">
+          <div class="cv" id="pv-cv"><div id="pv-sp"><div id="pv-in"><svg id="pv-svg" xmlns="http://www.w3.org/2000/svg"></svg></div></div></div>
+          <aside class="dp" id="pv-dp"><div class="empty">Kliknij tabelę, żeby zobaczyć zapisane w niej dane.</div></aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="v-req" hidden>
+      <div class="grid">
+        <div class="card">
+          <div class="row nt">
+            <select id="r-m" style="width:110px"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>OPTIONS</option><option>HEAD</option></select>
+            <input id="r-url" class="grow" placeholder="http://localhost:4000/ping" spellcheck="false">
+            <button class="btn pri" id="r-send">Wyślij</button>
+          </div>
+          <div class="two">
+            <label>Nagłówki (jeden na linię)<textarea id="r-h" rows="4">Content-Type: application/json</textarea></label>
+            <label>Body<textarea id="r-b" rows="4"></textarea></label>
+          </div>
+          <div class="two">
+            <label>User-Agent<input id="r-ua" value="DevKit/1.0"></label>
+            <label>Origin (opcjonalnie)<input id="r-o" placeholder="http://localhost:3000"></label>
+          </div>
+        </div>
+        <div class="card" id="r-res" hidden>
+          <div class="row nt"><span class="tag" id="r-st"></span><span class="m" id="r-meta"></span></div>
+          <details><summary>Nagłówki odpowiedzi</summary><pre id="r-rh"></pre></details>
+          <pre id="r-rb"></pre>
+        </div>
+        <div class="card span">
+          <h3>Test CORS</h3>
+          <p class="hint" style="margin:0 0 10px">Wysyła preflight OPTIONS dla każdego originu i pokazuje, który serwer przepuszcza. Adres i metoda pochodzą z formularza powyżej.</p>
+          <label>Originy do sprawdzenia<textarea id="c-o" rows="3">null
+http://localhost:3000
+https://obca-strona.example</textarea></label>
+          <div class="row"><button class="btn" id="c-go">Sprawdź CORS</button></div>
+          <table id="c-t" hidden><thead><tr><th>Origin</th><th>Status</th><th>Allow-Origin</th><th>Wynik</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <section id="v-proj" hidden>
+      <div class="grid wide" id="p-list"></div>
+      <p class="hint" id="p-root"></p>
+    </section>
+
+    <section id="v-claude" hidden>
+      <div class="chat">
+        <div class="chat-head"><span class="tag acc" id="cl-model"></span><span class="hint" id="cl-status" style="margin:0"></span><span class="sp"></span><button class="btn sm" id="cl-new">Nowa rozmowa</button></div>
+        <div class="chat-msgs" id="cl-msgs"><div class="chat-col"><div id="cl-list" class="chat-col" style="width:100%"></div><div id="cl-live"></div></div></div>
+        <div class="chat-in">
+          <textarea id="cl-in" rows="1" placeholder="Napisz wiadomość (Enter wysyła, Shift+Enter nowa linia)"></textarea>
+          <button class="btn pri" id="cl-send">Wyślij</button><button class="btn red" id="cl-stop" hidden>Zatrzymaj</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="v-links" hidden>
+      <div class="grid">
+        <div class="card">
+          <div class="list" id="l-list"></div>
+          <div class="row"><button class="btn pri" id="l-all">Otwórz wszystkie</button></div>
+          <p class="hint">Kolejność zmienisz przeciągając uchwyt po lewej albo strzałkami.</p>
+        </div>
+        <div class="card"><h3>Dodaj link</h3>
+          <div class="row nt"><input id="l-n" placeholder="Nazwa" style="width:160px"><input id="l-u" class="grow" placeholder="https://" spellcheck="false"><button class="btn" id="l-add">Dodaj</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="v-set" hidden>
+      <div class="grid">
+        <div class="card"><h3>Przeglądarka</h3>
+          <div class="two" style="margin-top:0">
+            <label>Otwieraj linki w<select id="s-br"></select></label>
+            <label class="chk" style="margin-top:22px"><input type="checkbox" id="s-pr">Tryb prywatny (incognito / InPrivate)</label>
+          </div>
+          <p class="hint warn" id="s-warn" hidden>Domyślna przeglądarka systemowa nie ma trybu prywatnego dostępnego z aplikacji. Linki otworzą się zwykłym oknem.</p>
+          <p class="hint warn" id="s-warn2" hidden>Sesje logowania zapisują się w DevKit\data\firefox-profile i trafiają do repo, więc repo musi być prywatne. Zamykaj okno Firefoksa przed synchronizacją w GitHub Desktop. Tryb prywatny nie jest tu używany.</p>
+          <div class="row"><button class="btn" id="s-test">Otwórz stronę testową</button></div>
+        </div>
+        <div class="card"><h3>XAMPP i baza danych</h3>
+          <label>Folder XAMPP<input id="s-x" spellcheck="false"></label>
+          <label style="margin-top:12px">Instalator XAMPP (plik .exe, otwierany przyciskiem Zainstaluj)<input id="s-inst" spellcheck="false" placeholder="np. C:\Users\...\Downloads\xampp-installer.exe"></label>
+          <div class="two"><label>Host MySQL<input id="s-h"></label><label>Port MySQL<input id="s-p" type="number"></label></div>
+          <div class="two"><label>Użytkownik<input id="s-u"></label><label>Hasło<input id="s-w" type="password" autocomplete="off"></label></div>
+          <div class="two"><label>Port Apache<input id="s-ap" type="number"></label><span></span></div>
+        </div>
+        <div class="card"><h3>Claude (OmniRoute)</h3>
+          <label>Adres API (zgodne z OpenAI)<input id="c-url" spellcheck="false" placeholder="http://localhost:20128/v1"></label>
+          <label style="margin-top:12px">Klucz API (z dashboardu OmniRoute, strona Endpoint)<input id="c-key" type="password" autocomplete="off" spellcheck="false"></label>
+          <label style="margin-top:12px">Model<input id="c-model" list="c-models" spellcheck="false" placeholder="np. model z Claude w nazwie"></label>
+          <datalist id="c-models"></datalist>
+          <div class="row"><button class="btn" id="c-fetch">Pobierz listę modeli</button></div>
+          <p class="hint">Claude czyta pliki repozytorium (tylko odczyt). Sekrety, klucze .pem i dane DevKita są wyłączone z dostępu.</p>
+        </div>
+        <div class="card"><h3>Dane DevKita</h3>
+          <p class="hint" style="margin:0 0 12px">DevKit jest przypisany do jednego repozytorium. Wyczyść dane, żeby zacząć od zera w nowym projekcie: usunie zapisane zrzuty baz i historię czatu Claude.</p>
+          <button class="btn dng" id="s-clear">Wyczyść dane</button>
+        </div>
+      </div>
+      <div class="row"><button class="btn pri" id="s-save">Zapisz ustawienia</button></div>
+    </section>
+  </div>
+
+  <div id="console"><h4 id="con-h"><span>Dziennik</span><button id="clr">Wyczyść</button></h4><div id="log"></div></div>
+</main>
+
+<dialog id="dlg">
+  <h3 id="dlg-t"></h3>
+  <p class="hint" style="margin:0 0 6px">Polecenia uruchamiają się w roocie repozytorium (lub w folderze projektu).</p>
+  <label>Nazwa folderu<input id="d-folder" spellcheck="false"></label>
+  <div id="d-next" hidden style="margin-top:10px">
+    <label style="margin:0">Opcje Next.js (zmiana buduje polecenie poniżej od nowa)</label>
+    <div class="chks">
+      <label class="chk"><input type="checkbox" data-f="ts">TypeScript</label>
+      <label class="chk"><input type="checkbox" data-f="eslint">ESLint</label>
+      <label class="chk"><input type="checkbox" data-f="tailwind">Tailwind CSS</label>
+      <label class="chk"><input type="checkbox" data-f="compiler">React Compiler</label>
+      <label class="chk"><input type="checkbox" data-f="src">Katalog src/</label>
+      <label class="chk"><input type="checkbox" data-f="cache">Cache Components</label>
+      <label class="chk"><input type="checkbox" data-f="agents">AGENTS.md</label>
+    </div>
+  </div>
+  <label style="margin-top:12px">Polecenie tworzenia<textarea id="d-create" rows="3" spellcheck="false"></textarea></label>
+  <div class="two">
+    <label>Po utworzeniu<input id="d-post" spellcheck="false"></label>
+    <label>Polecenie uruchomienia<input id="d-run" spellcheck="false"></label>
+  </div>
+  <div class="two">
+    <label>Instalacja zależności (gdy brak node_modules)<input id="d-install" spellcheck="false"></label>
+    <label>Port projektu (PORT w zmiennych ma pierwszeństwo)<input id="d-port" type="number"></label>
+  </div>
+  <label style="margin-top:12px">Zmienne środowiskowe (KEY=VALUE, jedna na linię)<textarea id="d-env" rows="3" spellcheck="false"></textarea></label>
+  <label class="chk"><input type="checkbox" id="d-inside">Utwórz wewnątrz folderu projektu (np. express-generator)</label>
+  <label class="chk"><input type="checkbox" id="d-inter">Interaktywnie: otwórz okno konsoli i odpowiadaj na pytania samodzielnie</label>
+  <div class="row" style="justify-content:space-between">
+    <button class="btn sm" id="d-reset">Przywróć domyślne</button>
+    <span class="row nt"><button class="btn" id="d-cancel">Anuluj</button><button class="btn pri" id="d-save">Zapisz</button></span>
+  </div>
+</dialog>
+
+<script>
+const TOKEN="__TOKEN__";
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const VIEWS={db:["Baza danych","Serwer XAMPP oraz import i eksport baz. Kopie leżą w folderze DevKit."],
+ prev:["Podgląd bazy","Tabele, relacje i zapisane dane ze zrzutu. Nie wymaga uruchomionego XAMPP-a."],
+ req:["Klient API","Zapytania wysyła lokalny backend, więc CORS przeglądarki ich nie blokuje."],
+ proj:["Projekt","Tworzenie, uruchamianie i konsola projektów web oraz api."],
+ claude:["Claude","Czat z dostępem do plików repozytorium (tylko odczyt). Jedna rozmowa na projekt."],
+ links:["Linki","Otwierane w wybranej przeglądarce."],set:["Ustawienia","Przeglądarka, XAMPP, Claude i dane DevKita."]};
+const FILL=new Set(["claude","prev"]),NAVMAP={prev:"db"};
+const NAME_OK=/^[A-Za-z0-9_][A-Za-z0-9_-]{0,63}$/;
+let cfg={},defs={},found={},dbs={local:[],dumps:[],up:false,apache:false,installed:true},view="db";
+
+async function api(p,d={}){try{const r=await fetch("/api/"+p,{method:"POST",headers:{"Content-Type":"application/json","X-Token":TOKEN},body:JSON.stringify(d)});return await r.json()}catch(e){return{ok:false,error:"Brak połączenia z DevKit (czy aplikacja działa?)"}}}
+function log(m,k=""){const l=$("#log"),e=document.createElement("div");e.className="ln2 "+k;e.innerHTML="<time>"+new Date().toLocaleTimeString("pl-PL")+"</time><span></span>";e.lastChild.textContent=m;l.append(e);l.scrollTop=l.scrollHeight}
+async function act(btn,p,d,start){if(btn)btn.disabled=true;if(start)log(start,"cmd");const r=await api(p,d);if(btn)btn.disabled=false;
+ if(r.log)log(r.log,r.ok?"":"bad");log(r.ok?(r.msg||"Gotowe"):(r.error||"Błąd"),r.ok?(r.warn?"warn":"ok"):"bad");return r}
+const size=b=>b<1024?b+" B":b<1048576?(b/1024).toFixed(1)+" KB":(b/1048576).toFixed(1)+" MB";
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+
+function show(v){view=v;document.querySelectorAll(".views>section").forEach(s=>s.hidden=s.id!=="v-"+v);
+ document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===(NAVMAP[v]||v)));
+ $("#views").classList.toggle("fill",FILL.has(v));$("#t").textContent=VIEWS[v][0];$("#d").textContent=VIEWS[v][1];
+ ({db:dbRefresh,proj:projPoll,claude:clEnter,links:linksRender,set:applyCfg}[v]||(()=>{}))()}
+$("#nav").onclick=e=>{if(e.target.dataset.v)show(e.target.dataset.v)};
+$("#clr").onclick=e=>{e.stopPropagation();$("#log").innerHTML=""};
+$("#con-h").onclick=()=>$("#console").classList.toggle("min");
+$("#quit").onclick=async()=>{await api("quit");document.body.innerHTML='<p style="padding:40px;color:#978eac">DevKit został zamknięty. Możesz zamknąć to okno.</p>'};
+
+/* ---- serwer XAMPP ---- */
+const SV={mysql:["#b-mysql","#sd-mysql","MySQL"],apache:["#b-apache","#sd-apache","Apache"]};
+function svcRender(){const up={mysql:dbs.up,apache:dbs.apache},inst=dbs.installed;
+ $("#xp-alert").hidden=inst;
+ for(const k in SV){const [b,d,n]=SV[k];$(b).textContent=(up[k]?"Zatrzymaj ":"Uruchom ")+n;$(d).className="dot "+(up[k]?"up":"down");$(b).disabled=!inst}
+ const all=up.mysql&&up.apache;$("#b-all").textContent=all?"Zatrzymaj wszystko":"Uruchom wszystko";$("#b-all").classList.toggle("red",all);$("#b-all").classList.toggle("pri",!all);$("#b-all").disabled=!inst;$("#b-pma").disabled=!inst;
+ $("#dot").className="dot "+(dbs.up?"up":"down");$("#dotx").textContent=dbs.up?"MySQL działa":"MySQL wyłączony"}
+async function svc(btn,what){const run=what==="all"?!(dbs.up&&dbs.apache):!dbs[what];
+ await act(btn,run?"svc.start":"svc.stop",{what},(run?"Uruchamiam ":"Zatrzymuję ")+(what==="all"?"wszystko":SV[what][2])+"...");dbRefresh()}
+$("#b-mysql").onclick=()=>svc($("#b-mysql"),"mysql");$("#b-apache").onclick=()=>svc($("#b-apache"),"apache");$("#b-all").onclick=()=>svc($("#b-all"),"all");
+$("#b-pma").onclick=()=>act($("#b-pma"),"db.pma");
+$("#xp-inst").onclick=()=>act($("#xp-inst"),"xampp.install");
+
+/* ---- baza ---- */
+const dbName=()=>$("#dbname").value.trim();
+async function dbRefresh(){const r=await api("db.status");if(!r.ok)return log(r.error,"bad");dbs=r;svcRender();
+ $("#dbsug").innerHTML=[...new Set([...r.local,...r.dumps.map(d=>d.name)])].map(n=>`<option value="${esc(n)}">`).join("");dbState()}
+function setBtn(b,mode){b.disabled=mode==="off";b.classList.toggle("pri",mode==="pri");b.classList.toggle("out",mode!=="pri")}
+function dbState(){const n=dbName(),ok=NAME_OK.test(n),l=ok&&dbs.local.includes(n),d=ok&&dbs.dumps.find(x=>x.name===n),up=dbs.up;
+ setBtn($("#b-imp"),!(ok&&d&&up)?"off":l?"out":"pri");   /* szary: brak zapisanej, obrys: jest też na komputerze, pełny: tylko zapisana */
+ setBtn($("#b-exp"),!(ok&&l&&up)?"off":"pri");           /* pełny: baza jest na komputerze */
+ setBtn($("#b-prev"),d?"out":"off");                     /* podgląd działa na zapisanym zrzucie, bez XAMPP-a */
+ $("#dbstate").innerHTML=!n?"Wpisz nazwę bazy.":!ok?"Dozwolone: litery, cyfry, _ i - (nie na początku).":
+  `Na komputerze: <span class="tag ${l?"ok":""}">${l?"jest":"brak"}</span> W DevKit: <span class="tag ${d?"acc":""}">${d?"zapisana, "+size(d.size):"brak"}</span>`+(dbs.installed&&!up?" MySQL nie działa, uruchom go obok.":"");
+ $("#b-exp").textContent=$("#s-drop").checked?"Eksportuj i usuń z komputera":"Eksportuj"}
+async function dbSave(){const r=await api("config.set",{db_name:dbName()});if(r.ok)cfg=r.cfg}
+$("#dbname").oninput=dbState;$("#dbname").onchange=dbSave;
+$("#s-drop").onchange=async()=>{const r=await api("config.set",{drop_after_export:$("#s-drop").checked});if(r.ok)cfg=r.cfg;dbState()};
+$("#b-imp").onclick=async()=>{if(dbs.local.includes(dbName())&&!confirm("Baza "+dbName()+" już istnieje na komputerze. Import nadpisze ją zapisaną kopią. Kontynuować?"))return;
+ await dbSave();await act($("#b-imp"),"db.import",{name:dbName()},"Import "+dbName()+"...");dbRefresh()};
+$("#b-exp").onclick=async()=>{const drop=$("#s-drop").checked;
+ if(!confirm(drop?"Wyeksportować "+dbName()+" i USUNĄĆ ją z komputera? Kopia zostanie w folderze DevKit.":"Wyeksportować "+dbName()+"?"))return;
+ await dbSave();await act($("#b-exp"),"db.export",{name:dbName(),drop},"Eksport "+dbName()+"...");dbRefresh()};
+
+/* ---- podgląd bazy (jak Designer w phpMyAdmin) ---- */
+const BW=240,HH=34,RH=24,PV={name:"",tables:[],pos:{},zoom:1,sel:null,tab:"data",off:0,limit:50};
+function autoLayout(tables){const by=Object.fromEntries(tables.map(t=>[t.name,t])),lvl={};
+ const lv=n=>{if(lvl[n]!==undefined)return lvl[n];lvl[n]=0;let m=-1;for(const f of by[n].fks)if(f.ref_table!==n&&by[f.ref_table])m=Math.max(m,lv(f.ref_table));return lvl[n]=m+1};
+ tables.forEach(t=>lv(t.name));const cols={};tables.forEach(t=>(cols[lvl[t.name]]??=[]).push(t));const pos={};
+ Object.entries(cols).forEach(([l,ts])=>{let y=30;ts.forEach(t=>{pos[t.name]=[30+l*(BW+90),y];y+=HH+t.columns.length*RH+36})});return pos}
+async function openPreview(){const n=dbName();const r=await act($("#b-prev"),"db.schema",{name:n},"Wczytuję podgląd "+n+"...");if(!r.ok)return;
+ Object.assign(PV,{name:n,tables:r.tables,pos:{...autoLayout(r.tables),...r.layout},sel:null,tab:"data",off:0});
+ $("#pv-title").textContent=n;$("#pv-meta").textContent=r.tables.length+" tabel, "+size(r.size)+", zapisano "+new Date(r.mtime*1000).toLocaleString("pl-PL");
+ show("prev");pvRender();pvFit();pvSelect(r.tables[0].name)}
+$("#b-prev").onclick=openPreview;$("#pv-back").onclick=()=>show("db");
+function pvRender(){const inn=$("#pv-in");inn.querySelectorAll(".tb").forEach(e=>e.remove());
+ inn.insertAdjacentHTML("beforeend",PV.tables.map(t=>`<div class="tb" data-t="${esc(t.name)}"><div class="tb-h"><b>${esc(t.name)}</b><span class="cnt">${t.rows}${t.truncated?"+":""}</span></div>${t.columns.map(c=>`<div class="tb-r"><i class="k ${c.pk?"pk":c.fk?"fk":""}">${c.pk?"PK":c.fk?"FK":""}</i><span class="cn${c.nullable?" nn":""}">${esc(c.name)}</span><span class="ct" title="${esc(c.type)}">${esc(c.type)}</span></div>`).join("")}</div>`).join(""));
+ pvPlace();pvLines()}
+function pvPlace(){document.querySelectorAll(".tb").forEach(b=>{const p=PV.pos[b.dataset.t]||[30,30];b.style.left=p[0]+"px";b.style.top=p[1]+"px";b.classList.toggle("sel",b.dataset.t===PV.sel)})}
+function pvBounds(){let w=640,h=420;for(const t of PV.tables){const p=PV.pos[t.name]||[0,0];w=Math.max(w,p[0]+BW+70);h=Math.max(h,p[1]+HH+t.columns.length*RH+70)}return[w,h]}
+function pvLines(){const [w,h]=pvBounds(),inn=$("#pv-in"),svg=$("#pv-svg");
+ inn.style.width=w+"px";inn.style.height=h+"px";inn.style.transform=`scale(${PV.zoom})`;$("#pv-sp").style.width=w*PV.zoom+"px";$("#pv-sp").style.height=h*PV.zoom+"px";
+ svg.setAttribute("width",w);svg.setAttribute("height",h);$("#pv-z").textContent=Math.round(PV.zoom*100)+"%";
+ let s='<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9d6bff"/></marker></defs>';
+ for(const t of PV.tables)for(const f of t.fks){const g=PV.tables.find(x=>x.name===f.ref_table);if(!g)continue;
+  f.columns.forEach((col,i)=>{const si=t.columns.findIndex(c=>c.name===col),ti=g.columns.findIndex(c=>c.name===f.ref_columns[i]);if(si<0||ti<0)return;
+   const a=PV.pos[t.name]||[0,0],b=PV.pos[g.name]||[0,0],y1=a[1]+HH+si*RH+RH/2,y2=b[1]+HH+ti*RH+RH/2;let x1,x2,dir=1,ov=false;
+   if(a[0]+BW+30<=b[0]){x1=a[0]+BW;x2=b[0]}else if(b[0]+BW+30<=a[0]){x1=a[0];x2=b[0]+BW;dir=-1}else{x1=a[0]+BW;x2=b[0]+BW;ov=true}
+   const dx=Math.max(50,Math.abs(x2-x1)/2),on=PV.sel&&(t.name===PV.sel||g.name===PV.sel);
+   s+=`<path class="ln${on?" on":""}" marker-end="url(#ar)" d="M${x1},${y1} C${x1+dir*dx},${y1} ${ov?x2+dx:x2-dir*dx},${y2} ${x2},${y2}"><title>${esc(f.name)}: ${esc(t.name)}.${esc(col)} -> ${esc(g.name)}.${esc(f.ref_columns[i])} (ON DELETE ${f.on_delete}, ON UPDATE ${f.on_update})</title></path><circle cx="${x1}" cy="${y1}" r="3.5" fill="#9d6bff"/>`})}
+ svg.innerHTML=s}
+function pvFit(){const cv=$("#pv-cv"),[w,h]=pvBounds();PV.zoom=clamp(Math.min(cv.clientWidth/w,cv.clientHeight/h,1),.3,1);pvLines()}
+const pvZoom=f=>{PV.zoom=clamp(PV.zoom*f,.3,1.6);pvLines()};
+$("#pv-zi").onclick=()=>pvZoom(1.15);$("#pv-zo").onclick=()=>pvZoom(1/1.15);$("#pv-fit").onclick=pvFit;
+$("#pv-re").onclick=()=>{PV.pos=autoLayout(PV.tables);pvPlace();pvLines();pvSaveLayout();pvFit()};
+$("#pv-cv").addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();pvZoom(e.deltaY<0?1.1:1/1.1)}},{passive:false});
+let pvT;function pvSaveLayout(){clearTimeout(pvT);pvT=setTimeout(()=>api("db.layout",{name:PV.name,layout:PV.pos}),400)}
+let pvRaf=0;const pvSoon=()=>{if(!pvRaf)pvRaf=requestAnimationFrame(()=>{pvRaf=0;pvLines()})};
+$("#pv-in").addEventListener("pointerdown",e=>{const h=e.target.closest(".tb-h");if(!h)return;const b=h.parentElement,name=b.dataset.t,p=[...PV.pos[name]],sx=e.clientX,sy=e.clientY;let moved=false;
+ h.setPointerCapture(e.pointerId);
+ const mv=ev=>{const dx=(ev.clientX-sx)/PV.zoom,dy=(ev.clientY-sy)/PV.zoom;if(Math.abs(dx)+Math.abs(dy)>3)moved=true;if(!moved)return;
+  PV.pos[name]=[Math.max(0,p[0]+dx),Math.max(0,p[1]+dy)];b.style.left=PV.pos[name][0]+"px";b.style.top=PV.pos[name][1]+"px";pvSoon()};
+ const up=()=>{h.removeEventListener("pointermove",mv);h.removeEventListener("pointerup",up);if(moved)pvSaveLayout();else pvSelect(name)};
+ h.addEventListener("pointermove",mv);h.addEventListener("pointerup",up);e.preventDefault()});
+$("#pv-in").addEventListener("click",e=>{const b=e.target.closest(".tb");if(b&&!e.target.closest(".tb-h"))pvSelect(b.dataset.t)});
+function pvSelect(name){PV.sel=name;PV.off=0;pvPlace();pvLines();pvPanel()}
+const cell=v=>v===null?'<span class="nl">NULL</span>':esc(String(v));
+async function pvPanel(){const t=PV.tables.find(x=>x.name===PV.sel);if(!t)return;
+ $("#pv-dp").innerHTML=`<div class="dp-h"><b>${esc(t.name)}</b><span class="hint" style="margin:0">${t.rows}${t.truncated?"+":""} wierszy, ${t.columns.length} kolumn</span></div>
+ <div class="tabs"><button data-tab="data" class="${PV.tab==="data"?"on":""}">Dane</button><button data-tab="struct" class="${PV.tab==="struct"?"on":""}">Struktura</button></div><div class="dp-b" id="dp-b"></div><div class="pager" id="dp-p" hidden></div>`;
+ if(PV.tab==="struct"){$("#dp-b").innerHTML=`<table class="dt"><thead><tr><th>Kolumna</th><th>Typ</th><th>Null</th><th>Domyślna</th><th>Klucz</th></tr></thead><tbody>${t.columns.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${c.nullable?"tak":"nie"}</td><td>${c.default===null?'<span class="nl">brak</span>':esc(c.default)}${c.auto?" (auto)":""}</td><td>${[c.pk?"PK":"",c.unique?"UNIQUE":"",c.fk?"FK > "+esc(c.fk.table)+"."+esc(c.fk.column):""].filter(Boolean).join(", ")}</td></tr>`).join("")}</tbody></table>
+  ${t.fks.length?`<p class="hint" style="padding:0 12px">Relacje: ${t.fks.map(f=>`${esc(f.columns.join(","))} > ${esc(f.ref_table)}.${esc(f.ref_columns.join(","))} (ON DELETE ${f.on_delete}, ON UPDATE ${f.on_update})`).join("; ")}</p>`:""}
+  ${t.indexes.length?`<p class="hint" style="padding:0 12px 12px">Indeksy: ${t.indexes.map(i=>`${esc(i.name)} (${esc(i.columns.join(","))})${i.unique?" UNIQUE":""}`).join("; ")}</p>`:""}`;return}
+ const r=await api("db.rows",{name:PV.name,table:t.name,offset:PV.off,limit:PV.limit});if(PV.sel!==t.name||PV.tab!=="data")return;
+ if(!r.ok){$("#dp-b").innerHTML=`<div class="empty">${esc(r.error)}</div>`;return}
+ $("#dp-b").innerHTML=r.total?`<table class="dt"><thead><tr>${t.columns.map(c=>`<th>${esc(c.name)}</th>`).join("")}</tr></thead><tbody>${r.rows.map(row=>`<tr>${row.map(v=>`<td title="${esc(v===null?"NULL":v)}">${cell(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>`:'<div class="empty">Tabela jest pusta.</div>';
+ const p=$("#dp-p");p.hidden=r.total<=PV.limit;p.innerHTML=`<button class="btn sm" data-pg="-1" ${PV.off<=0?"disabled":""}>Poprzednie</button><span>${PV.off+1}-${Math.min(PV.off+PV.limit,r.total)} z ${r.total}</span><button class="btn sm" data-pg="1" ${PV.off+PV.limit>=r.total?"disabled":""}>Następne</button>`}
+$("#pv-dp").onclick=e=>{const tb=e.target.closest("[data-tab]"),pg=e.target.closest("[data-pg]");if(tb){PV.tab=tb.dataset.tab;PV.off=0;pvPanel()}if(pg&&!pg.disabled){PV.off=Math.max(0,PV.off+PV.limit*Number(pg.dataset.pg));pvPanel()}};
+
+/* ---- klient API ---- */
+$("#r-send").onclick=async()=>{const r=await act($("#r-send"),"req.send",{method:$("#r-m").value,url:$("#r-url").value.trim(),headers:$("#r-h").value,body:$("#r-b").value,ua:$("#r-ua").value,origin:$("#r-o").value.trim()});
+ if(!r.ok)return;$("#r-res").hidden=false;const g=r.status<300?"ok":r.status<400?"acc":"bad";
+ $("#r-st").className="tag "+g;$("#r-st").textContent=r.status+" "+r.reason;$("#r-meta").textContent=r.ms+" ms, "+size(r.size);
+ $("#r-rh").textContent=r.headers.map(h=>h[0]+": "+h[1]).join("\n");let b=r.body;try{b=JSON.stringify(JSON.parse(b),null,2)}catch{}$("#r-rb").textContent=b};
+$("#c-go").onclick=async()=>{const r=await act($("#c-go"),"req.cors",{url:$("#r-url").value.trim(),method:$("#r-m").value,ua:$("#r-ua").value,origins:$("#c-o").value});
+ if(!r.ok)return;$("#c-t").hidden=false;$("#c-t tbody").innerHTML=r.results.map(x=>`<tr><td>${esc(x.origin)}</td><td>${x.status||"błąd"}</td><td>${esc(x.error||x.allow||"brak nagłówka")}</td><td><span class="tag ${x.allowed?"acc":"ok"}">${x.allowed?"przepuszcza":"odrzuca"}</span></td></tr>`).join("")};
+
+/* ---- projekty ---- */
+const PK=["web","api"],PS={};PK.forEach(k=>PS[k]={next:0,state:"",busy:false});
+const ICON={play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>',
+ refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>',
+ stop:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>',
+ hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
+ gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+ up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+ down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'};
+const LABEL={none:"Brak projektu",creating:"Tworzenie...",installing:"Instalacja zależności...",off:"Wyłączony",running:"Działa"},DOT={installing:"creating"};
+$("#p-list").innerHTML=PK.map(k=>`<div class="proj" id="pj-${k}" data-k="${k}"><div class="prow">
+ <i class="dot" id="pd-${k}"></i><b class="pname" data-a="tog">${k}</b><span class="pst" id="ps-${k}"></span><span class="sp"></span>
+ <button class="btn pri" data-a="create" id="pc-${k}">Utwórz projekt</button>
+ <div class="ctl" id="pk-${k}"><button class="ib go" data-a="run" title="Uruchom">${ICON.play}</button><button class="ib go" data-a="restart" title="Restartuj">${ICON.refresh}</button><button class="ib stop" data-a="stop" title="Zatrzymaj">${ICON.stop}</button></div>
+ <button class="ib" data-a="hist" id="ph-${k}" title="Historia konsoli" aria-pressed="false">${ICON.hist}</button>
+ <button class="ib gear" data-a="cfg" title="Ustawienia">${ICON.gear}</button></div>
+ <div class="cons" id="pn-${k}"><div class="cin"><div class="term" id="pt-${k}"></div></div></div></div>`).join("");
+const ANSI={30:"#6b6b7b",31:"#ff7590",32:"#58d3a2",33:"#f2b86b",34:"#7aa2ff",35:"#c3a6ff",36:"#5fd0e0",37:"#e6e1f2",90:"#8a8299",91:"#ff8fa3",92:"#7ae8bd",93:"#ffd08a",94:"#9db8ff",95:"#d6bfff",96:"#8fe3ef",97:"#ffffff"};
+function ansi(line){let depth=0;const t=esc(line.replace(/\r/g,"")).replace(/\x1b\[[0-9;?]*[A-HJKSTfhlsu]/g,"");
+ const o=t.replace(/\x1b\[([0-9;]*)m/g,(_,c)=>{const cs=c?c.split(";").map(Number):[0];let h="";for(const n of cs){if(n===0){h+="</span>".repeat(depth);depth=0}else if(n===1){h+='<span style="font-weight:700">';depth++}else if(ANSI[n]){h+=`<span style="color:${ANSI[n]}">`;depth++}else if(n===39||n===22){h+="</span>".repeat(depth);depth=0}}return h});
+ return o+"</span>".repeat(depth)}
+const isOpen=k=>$("#pn-"+k).classList.contains("open");
+function setCons(k,open){$("#pn-"+k).classList.toggle("open",open);const h=$("#ph-"+k);h.classList.toggle("on",open);h.setAttribute("aria-pressed",open)}
+function projApply(k,state,ext){const P=PS[k],was=P.state;P.state=state;const live=state==="running"||state==="installing";
+ $("#pd-"+k).className="dot "+(DOT[state]||state);$("#ps-"+k).textContent=LABEL[state]+(ext?" (uruchomiony poza DevKit)":"");
+ $("#pc-"+k).hidden=state!=="none";$("#pk-"+k).hidden=state==="none"||state==="creating";
+ const b=[...$("#pk-"+k).children];b[0].disabled=live;b[2].disabled=!live;$("#pc-"+k).disabled=false;
+ if(state!==was){if(live||state==="creating")setCons(k,true);
+  else if(P.userStop)setCons(k,false);   /* zatrzymane przyciskiem: zwijamy; po awarii konsola zostaje otwarta */
+  if(!live&&state!=="creating")P.userStop=false}}
+async function projPoll(){if($("#v-proj").hidden)return;
+ for(const k of PK){const P=PS[k];if(P.busy)continue;P.busy=true;
+  const r=await api("proj.state",{key:k,since:P.next});P.busy=false;if(!r.ok)continue;
+  if(r.lines.length){const t=$("#pt-"+k),stick=t.scrollHeight-t.scrollTop-t.clientHeight<50;
+   t.insertAdjacentHTML("beforeend",r.lines.map(l=>"<div>"+ansi(l)+"</div>").join(""));
+   while(t.childElementCount>1500)t.firstChild.remove();if(stick)t.scrollTop=t.scrollHeight}
+  P.next=r.next;projApply(k,r.state,r.external)}}
+$("#p-list").onclick=async e=>{const b=e.target.closest("[data-a]");if(!b)return;const k=b.closest(".proj").dataset.k,a=b.dataset.a;
+ if(a==="tog"||a==="hist")return setCons(k,!isOpen(k));
+ if(a==="cfg")return openCfg(k);
+ if(a==="stop")PS[k].userStop=true;
+ const R={create:["proj.create","Tworzę projekt "+k+"..."],run:["proj.run","Uruchamiam "+k+"..."],restart:["proj.restart","Restartuję "+k+"..."],stop:["proj.stop","Zatrzymuję "+k+"..."]}[a];
+ await act(b,R[0],{key:k},R[1]);projPoll()};
+setInterval(projPoll,1000);
+
+let dk=null;const FL=[["ts","--ts","--js"],["eslint","--eslint","--no-linter"],["tailwind","--tailwind","--no-tailwind"],["compiler","--react-compiler","--no-react-compiler"],["src","--src-dir","--no-src-dir"],["cache","--cache-components",""],["agents","--agents-md","--no-agents-md"]];
+const hasFlag=(cmd,f)=>new RegExp("(^|\\s)"+f+"(\\s|$)").test(cmd);
+function syncChecks(cmd){FL.forEach(([k,on])=>document.querySelector(`[data-f=${k}]`).checked=hasFlag(cmd,on))}
+function buildNext(){const fl=FL.map(([k,on,off])=>document.querySelector(`[data-f=${k}]`).checked?on:off).filter(Boolean).join(" ");
+ $("#d-create").value=`npx create-next-app@latest ${$("#d-folder").value.trim()||"web"} ${fl} --app --import-alias "@/*" --use-npm --yes`}
+document.querySelectorAll("[data-f]").forEach(c=>c.onchange=buildNext);
+function fillDlg(p){$("#d-folder").value=p.folder;$("#d-create").value=p.create;$("#d-post").value=p.post;$("#d-run").value=p.run;$("#d-install").value=p.install;$("#d-port").value=p.port;$("#d-env").value=p.env;$("#d-inside").checked=p.inside;$("#d-inter").checked=p.interactive;if(dk==="web")syncChecks(p.create)}
+function openCfg(k){dk=k;$("#dlg-t").textContent="Ustawienia projektu: "+k;$("#d-next").hidden=k!=="web";fillDlg(cfg.projects[k]);$("#dlg").showModal()}
+$("#d-cancel").onclick=()=>$("#dlg").close();
+$("#d-reset").onclick=()=>fillDlg(defs.projects[dk]);
+$("#d-save").onclick=async()=>{const p={folder:$("#d-folder").value.trim(),create:$("#d-create").value.trim(),post:$("#d-post").value.trim(),run:$("#d-run").value.trim(),install:$("#d-install").value.trim(),port:Number($("#d-port").value)||defs.projects[dk].port,env:$("#d-env").value,inside:$("#d-inside").checked,interactive:$("#d-inter").checked};
+ const r=await act($("#d-save"),"config.set",{projects:{...cfg.projects,[dk]:p}});if(r.ok){cfg=r.cfg;$("#dlg").close();projPoll()}};
+
+/* ---- Claude ---- */
+let CL={rev:-1,busy:false,msgs:[]};
+function inl(s){return esc(s).replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>")}
+function para(p){let out="",list=null;const close=()=>{if(list){out+=`</${list}>`;list=null}};
+ for(const ln of p.split("\n")){let m;
+  if(m=ln.match(/^\s*[-*]\s+(.*)/)){if(list!=="ul"){close();out+="<ul>";list="ul"}out+="<li>"+inl(m[1])+"</li>"}
+  else if(m=ln.match(/^\s*\d+[.)]\s+(.*)/)){if(list!=="ol"){close();out+="<ol>";list="ol"}out+="<li>"+inl(m[1])+"</li>"}
+  else{close();if(m=ln.match(/^#{1,4}\s+(.*)/))out+=`<p class="h">${inl(m[1])}</p>`;else if(ln.trim())out+="<p>"+inl(ln)+"</p>"}}
+ close();return out}
+function md(t){return String(t||"").split("```").map((p,i)=>{if(i%2===0)return para(p);const nl=p.indexOf("\n"),first=nl<0?"":p.slice(0,nl).trim(),lang=/^[\w+#.-]{1,20}$/.test(first)?first:"",code=lang||first===""?p.slice(nl+1):p;
+ return `<div class="code"><div class="code-h"><span>${esc(lang||"kod")}</span><button data-copy>Kopiuj</button></div><pre><code>${esc(code.replace(/\n$/,""))}</code></pre></div>`}).join("")}
+function toolLabel(c){let a={};try{a=JSON.parse(c.function.arguments||"{}")}catch{}return c.function.name+" "+(a.path||a.pattern||"")+(a.start_line?":"+a.start_line:"")}
+function clRender(){const out=[];
+ for(const m of CL.msgs){
+  if(m.role==="user")out.push(`<div class="msg u"><div class="bub">${esc(m.content)}</div></div>`);
+  else if(m.role==="assistant")out.push(`<div class="msg a"><div class="bub">${md(m.content)}${m.tool_calls?`<div class="tool">${m.tool_calls.map(c=>`<span class="chip">${esc(toolLabel(c))}</span>`).join("")}</div>`:""}</div></div>`);
+  else if(m.role==="tool")out.push(`<div class="msg a"><div class="bub" style="background:none;border:0;padding:0 14px"><details class="toolres"><summary>Wynik: ${esc(m.name||"narzędzie")} (${(m.content||"").length} znaków)</summary><pre>${esc((m.content||"").slice(0,4000))}</pre></details></div></div>`);
+  else if(m.role==="error")out.push(`<div class="msg e"><div class="bub">${esc(m.content)}</div></div>`)}
+ if(!CL.msgs.length)out.push('<div class="empty">Zapytaj o kod, np. „Przeczytaj web/app/page.tsx i powiedz, co poprawić”. Claude sam przeczyta potrzebne pliki.</div>');
+ const box=$("#cl-msgs"),stick=box.scrollHeight-box.scrollTop-box.clientHeight<80;$("#cl-list").innerHTML=out.join("");if(stick)box.scrollTop=box.scrollHeight}
+async function clLoad(){const r=await api("claude.history");if(!r.ok)return log(r.error,"bad");CL.msgs=r.messages;CL.rev=r.rev;clRender()}
+function clBusy(b,live,status){CL.busy=b;$("#cl-send").hidden=b;$("#cl-stop").hidden=!b;$("#cl-in").disabled=false;
+ $("#cl-status").textContent=b?(status||""):"";
+ $("#cl-live").innerHTML=b?`<div class="msg a"><div class="bub">${live?md(live):'<span class="typing"><i></i>Model odpowiada...</span>'}</div></div>`:"";
+ const box=$("#cl-msgs");if(b&&box.scrollHeight-box.scrollTop-box.clientHeight<120)box.scrollTop=box.scrollHeight}
+async function clPoll(){if(view!=="claude")return;const s=await api("claude.state");if(!s.ok)return;
+ $("#cl-model").textContent=s.model||"model nie wybrany";
+ if(s.rev!==CL.rev)await clLoad();clBusy(s.busy,s.live,s.status);
+ if(!s.configured&&!$("#cl-warn")){$("#cl-list").insertAdjacentHTML("beforebegin",'<div class="alert" id="cl-warn"><span>Uzupełnij adres OmniRoute i model w Ustawieniach.</span><button class="lnk" id="cl-goset">Otwórz ustawienia</button></div>');$("#cl-goset").onclick=()=>show("set")}
+ if(s.configured&&$("#cl-warn"))$("#cl-warn").remove()}
+function clEnter(){CL.rev=-1;clPoll();setTimeout(()=>$("#cl-in").focus(),50)}
+setInterval(clPoll,450);
+async function clSend(){const t=$("#cl-in").value.trim();if(!t||CL.busy)return;$("#cl-in").value="";$("#cl-in").style.height="auto";
+ const r=await api("claude.send",{text:t});if(!r.ok){log(r.error,"bad");$("#cl-in").value=t;return}clPoll()}
+$("#cl-send").onclick=clSend;
+$("#cl-stop").onclick=()=>api("claude.stop");
+$("#cl-in").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();clSend()}});
+$("#cl-in").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=Math.min(200,e.target.scrollHeight)+"px"});
+$("#cl-new").onclick=async()=>{if(!confirm("Rozpocząć nową rozmowę? Obecna historia zostanie usunięta."))return;const r=await act($("#cl-new"),"claude.clear");if(r.ok)clLoad()};
+$("#cl-msgs").onclick=e=>{const b=e.target.closest("[data-copy]");if(!b)return;navigator.clipboard.writeText(b.closest(".code").querySelector("code").textContent).then(()=>{b.textContent="Skopiowano";setTimeout(()=>b.textContent="Kopiuj",1200)})};
+
+/* ---- linki (z możliwością zmiany kolejności) ---- */
+function linksRender(){$("#l-list").innerHTML=cfg.links.length?cfg.links.map((l,i)=>`<div class="lk" draggable="true" data-i="${i}"><button class="grip" aria-label="Przeciągnij, żeby zmienić kolejność" title="Przeciągnij">⋮⋮</button><span class="n"><b>${esc(l.name)}</b> <span class="m">${esc(l.url)}</span></span><button class="ib" data-up="${i}" title="Wyżej" ${i===0?"disabled":""}>${ICON.up}</button><button class="ib" data-dn="${i}" title="Niżej" ${i===cfg.links.length-1?"disabled":""}>${ICON.down}</button><button class="btn sm" data-o="${i}">Otwórz</button><button class="btn sm dng" data-x="${i}">Usuń</button></div>`).join(""):'<p class="hint" style="margin:0">Brak linków. Dodaj pierwszy obok.</p>'}
+async function saveLinks(links){const r=await api("config.set",{links});if(r.ok){cfg=r.cfg;linksRender()}else log(r.error,"bad")}
+function moveLink(from,to){const a=[...cfg.links],[x]=a.splice(from,1);a.splice(clamp(to,0,a.length),0,x);saveLinks(a)}
+$("#l-list").onclick=async e=>{const t=e.target.closest("button");if(!t)return;const d=t.dataset;
+ if(d.o!==undefined)act(t,"link.open",{url:cfg.links[d.o].url});
+ if(d.x!==undefined)saveLinks(cfg.links.filter((_,i)=>i!=d.x));
+ if(d.up!==undefined)moveLink(+d.up,+d.up-1);if(d.dn!==undefined)moveLink(+d.dn,+d.dn+1)};
+let dragI=null;
+$("#l-list").addEventListener("dragstart",e=>{const r=e.target.closest(".lk");if(!r)return;dragI=+r.dataset.i;r.classList.add("drag");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",String(dragI))});
+$("#l-list").addEventListener("dragend",()=>{dragI=null;document.querySelectorAll(".lk").forEach(r=>r.classList.remove("drag","over-t","over-b"))});
+$("#l-list").addEventListener("dragover",e=>{const r=e.target.closest(".lk");if(!r||dragI===null)return;e.preventDefault();const top=e.clientY<r.getBoundingClientRect().top+r.offsetHeight/2;
+ document.querySelectorAll(".lk").forEach(x=>x.classList.remove("over-t","over-b"));r.classList.add(top?"over-t":"over-b")});
+$("#l-list").addEventListener("drop",e=>{const r=e.target.closest(".lk");if(!r||dragI===null)return;e.preventDefault();const top=e.clientY<r.getBoundingClientRect().top+r.offsetHeight/2;
+ let to=+r.dataset.i+(top?0:1);if(dragI<to)to--;if(to!==dragI)moveLink(dragI,to);dragI=null});
+$("#l-all").onclick=()=>act($("#l-all"),"link.openall");
+$("#l-add").onclick=async()=>{const n=$("#l-n").value.trim(),u=$("#l-u").value.trim();if(!n||!/^https?:\/\//.test(u))return log("Podaj nazwę i adres zaczynający się od http:// lub https://","bad");
+ await saveLinks([...cfg.links,{name:n,url:u}]);$("#l-n").value=$("#l-u").value="";log("Dodano link "+n,"ok")};
+
+/* ---- ustawienia ---- */
+const BN={chrome:"Chrome",brave:"Brave",firefox:"Firefox",edge:"Edge"};
+function applyCfg(){$("#s-br").innerHTML=Object.keys(BN).map(k=>`<option value="${k}">${BN[k]}${found[k]?"":" (nie znaleziono)"}</option>`).join("")+`<option value="firefox-portable">Firefox z profilem w DevKit (sesje w repo)${found.firefox?"":" (nie znaleziono)"}</option><option value="default">Domyślna systemowa</option>`;
+ $("#s-br").value=cfg.browser;$("#s-pr").checked=cfg.private;$("#s-x").value=cfg.xampp;$("#s-inst").value=cfg.xampp_installer;$("#s-h").value=cfg.db_host;$("#s-p").value=cfg.db_port;$("#s-ap").value=cfg.apache_port;$("#s-u").value=cfg.db_user;$("#s-w").value=cfg.db_pass;
+ $("#c-url").value=cfg.claude.base_url;$("#c-key").value=cfg.claude.api_key;$("#c-model").value=cfg.claude.model;
+ $("#dbname").value=cfg.db_name;$("#s-drop").checked=cfg.drop_after_export;warn()}
+function warn(){const b=$("#s-br").value;$("#s-warn").hidden=!(b==="default"&&$("#s-pr").checked);$("#s-warn2").hidden=b!=="firefox-portable";$("#s-pr").disabled=b==="firefox-portable"}
+$("#s-br").onchange=$("#s-pr").onchange=warn;
+$("#s-save").onclick=async()=>{const r=await act($("#s-save"),"config.set",{browser:$("#s-br").value,private:$("#s-pr").checked,xampp:$("#s-x").value.trim(),xampp_installer:$("#s-inst").value.trim(),db_host:$("#s-h").value.trim(),db_port:$("#s-p").value,apache_port:$("#s-ap").value,db_user:$("#s-u").value.trim(),db_pass:$("#s-w").value,
+ claude:{base_url:$("#c-url").value.trim(),api_key:$("#c-key").value.trim(),model:$("#c-model").value.trim()}});if(r.ok){cfg=r.cfg;dbRefresh()}};
+$("#s-test").onclick=async()=>{await api("config.set",{browser:$("#s-br").value,private:$("#s-pr").checked});act($("#s-test"),"link.open",{url:"https://example.com"})};
+$("#c-fetch").onclick=async()=>{const sv=await api("config.set",{claude:{base_url:$("#c-url").value.trim(),api_key:$("#c-key").value.trim(),model:$("#c-model").value.trim()}});if(!sv.ok)return log(sv.error,"bad");cfg=sv.cfg;
+ const r=await act($("#c-fetch"),"claude.models",{},"Pobieram modele z OmniRoute...");if(r.ok)$("#c-models").innerHTML=r.models.map(m=>`<option value="${esc(m)}">`).join("")};
+$("#s-clear").onclick=async()=>{if(!confirm("Usunąć zapisane zrzuty baz i historię czatu Claude? Tego nie można cofnąć."))return;
+ const r=await act($("#s-clear"),"data.clear");if(r.ok){cfg=r.cfg;applyCfg();CL.msgs=[];CL.rev=-1;dbRefresh()}};
+
+(async()=>{const r=await api("config.get");if(!r.ok)return log(r.error,"bad");cfg=r.cfg;defs=r.defaults;found=r.found;log("Root repozytorium: "+r.root);applyCfg();show("db");
+ setInterval(()=>api("ping"),10000);api("ping");setInterval(()=>{if(view==="db"&&!document.hidden)dbRefresh()},5000)})();
+</script>
+</body>
+</html>
